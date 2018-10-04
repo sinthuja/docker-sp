@@ -20,10 +20,18 @@
 FROM wso2sp-base:4.3.0
 MAINTAINER WSO2 Docker Maintainers "dev@wso2.org"
 
+ARG VICK_PROFILE_FILES=./files
+
+# copy the osgified jars
+COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/lib/*.jar ${WSO2_SERVER_HOME}/lib/
+COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/siddhi/* ${WSO2_SERVER_HOME}/wso2/worker/deployment/siddhi-files/
+COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/conf/* ${WSO2_SERVER_HOME}/conf/worker/
+
+
 # copy entrypoint bash script to user home
 COPY --chown=wso2carbon:wso2 init.sh ${WORKING_DIRECTORY}/
 
 # expose ports
-EXPOSE 9743 9715 9615 9390 7714 7614
+EXPOSE 9090 9443 9712 9612 7711 7611 9091
 
 ENTRYPOINT ["/home/wso2carbon/init.sh"]

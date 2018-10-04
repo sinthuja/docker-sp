@@ -20,10 +20,13 @@
 FROM wso2sp-base:4.3.0
 MAINTAINER WSO2 Docker Maintainers "dev@wso2.org"
 
+ARG VICK_PROFILE_FILES=./files
+
 # copy entrypoint bash script to user home
+COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/conf/* ${WSO2_SERVER_HOME}/conf/dashboard/
 COPY --chown=wso2carbon:wso2 init.sh ${WORKING_DIRECTORY}/
 
 # expose ports
-EXPOSE 9743 9715 9615 9390 7714 7614
+EXPOSE 9714 9643 9614 7713 7613
 
 ENTRYPOINT ["/home/wso2carbon/init.sh"]

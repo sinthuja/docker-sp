@@ -52,7 +52,7 @@ services:
       kafka:
         condition: service_healthy
   manager1:
-    image: docker.wso2.com/wso2sp-manager:4.2.0
+    image: docker.wso2.com/wso2sp-manager:4.3.0
     container_name: wso2sp-manager-1
     ports:
       - "9543:9543"
@@ -72,7 +72,7 @@ services:
     links:
       - mysql
   manager2:
-    image: docker.wso2.com/wso2sp-manager:4.2.0
+    image: docker.wso2.com/wso2sp-manager:4.3.0
     container_name: wso2sp-manager-2
     ports:
       - "9544:9543"
@@ -92,7 +92,7 @@ services:
     links:
       - manager1
   worker1:
-    image: docker.wso2.com/wso2sp-worker:4.2.0
+    image: docker.wso2.com/wso2sp-worker:4.3.0
     container_name: wso2sp-worker-1
     ports:
       - "9001:9443"
@@ -112,7 +112,7 @@ services:
     links:
       - manager1
   worker2:
-    image: docker.wso2.com/wso2sp-worker:4.2.0
+    image: docker.wso2.com/wso2sp-worker:4.3.0
     container_name: wso2sp-worker-2
     ports:
       - "9002:9443"
@@ -132,7 +132,7 @@ services:
     links:
       - manager1
   worker3:
-    image: docker.wso2.com/wso2sp-worker:4.2.0
+    image: docker.wso2.com/wso2sp-worker:4.3.0
     container_name: wso2sp-worker-3
     ports:
       - "9003:9443"
@@ -152,7 +152,7 @@ services:
     links:
       - manager1
   worker4:
-    image: docker.wso2.com/wso2sp-worker:4.2.0
+    image: docker.wso2.com/wso2sp-worker:4.3.0
     container_name: wso2sp-worker-4
     ports:
       - "9004:9443"
