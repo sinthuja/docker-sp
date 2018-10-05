@@ -8,42 +8,50 @@
 define stream TelemetryStream (source_uid string, source_ip string, source_labels string, source_name string, source_namespace string, source_principal string, source_owner string, source_workload_uid string, source_workload_name string, source_workload_namespace string, destination_uid string, destination_ip string, destination_port long, destination_labels string, destination_name string, destination_namespace string, destination_principal string, destination_owner string, destination_workload_uid string, destination_workload_name string, destination_workload_namespace string, destination_container_name string, destination_container_image string, destination_service_host string, destination_service_uid string, destination_service_name string, destination_service_namespace string, request_headers string, request_id string, request_path string, request_host string, request_method string, request_reason string, request_referer string, request_scheme string, request_size long, request_total_size long, request_time_sec long, request_time_nanosec int, request_useragent string, response_headers string, response_size long, response_total_size long, response_time_sec long, response_time_nanosec int, response_duration_sec long, response_duration_nanosec int, response_code long, response_grpc_status string, response_grpc_message string, connection_id string, connection_event string, connection_received_bytes long, connection_received_bytes_total long, connection_sent_bytes long, connection_sent_bytes_total long, connection_duration_sec long, connection_duration_nanosec int, connection_mtls bool, connection_requested_server_name string, context_protocol string, context_time_sec long, context_time_nanosec int, context_reporter_kind string, context_reporter_uid string, api_service string, api_version string, api_operation string, api_protocol string, request_auth_principal string, request_auth_audiences string, request_auth_presenter string, request_auth_claims string, request_api_key string, check_error_code long, check_error_message string, check_cache_hit bool, quota_cache_hit bool); 
 
 
--- @sink(type='log', prefix='SUMMARY')
--- define stream SummaryStream (request_host string, request_method string, request_path string, secCount long);
-
--- from TelemetryStream#window.timeBatch(10 sec) select request_host, request_method, request_path, count() as secCount
--- group by request_host, request_method, request_path
--- insert into SummaryStream;
+@store(type='rdbms',datasource="HTTP_ANALYTICS_DB")
+define table VickInfoTable( cellName string, podName string);
 
 @sink(type='log', prefix='SUMMARY')
-define stream RequestsStream(timestamp long, serverName string, serviceName string, serviceMethod string, responseTime double, httpResponseCode int, userAgent string, requestIP string); 
+define stream RequestsStream(timestamp long, serverName string, serviceName string, serviceMethod string, responseTime double, httpResponseCode int, userAgent string, requestIP string);
 
-define stream ProcessedRequestsStream(timestamp long, serverName string, serviceName string, serviceMethod string, responseTime double, httpRespGroup string, userAgent string, 
+@sink(type='log', prefix='POD_STREAM')
+define stream RequestsPodStream(timestamp long, podName string, serverName string, serviceName string, serviceMethod string, responseTime double, httpResponseCode int, userAgent string, requestIP string);
+-- define stream RequetsPodStream(podName string, serverName string, serviceName string, serviceMethod string);
+
+define stream ProcessedRequestsStream(timestamp long, cellName string, serverName string, serviceName string, serviceMethod string, responseTime double, httpRespGroup string, userAgent string,
 requestIP string);
 
-@store(type="rdbms",datasource="HTTP_ANALYTICS_DB") 
-define table ServiceTable( serverName string, serviceName string); 
+@store(type="rdbms",datasource="HTTP_ANALYTICS_DB")
+@purge(enable="false")
+define table ServiceTable (cellName string, serverName string, serviceName string, serviceMethod string);
 
-@store(type="rdbms",datasource="HTTP_ANALYTICS_DB") 
-define aggregation RequestAggregation from ProcessedRequestsStream 
-select serverName, serviceName, serviceMethod, httpRespGroup, count() as numRequests, avg(responseTime) as avgRespTime 
-group by serverName, serviceName, serviceMethod, httpRespGroup
-aggregate   every sec...year; 
 
-@info(name='ConvertToRequestStream') 
+@store(type="rdbms",datasource="HTTP_ANALYTICS_DB")
+@purge(enable="false")
+define aggregation RequestAggregation from ProcessedRequestsStream
+select cellName, serverName, serviceName, serviceMethod, httpRespGroup, count() as numRequests, avg(responseTime) as avgRespTime
+group by cellName, serverName, serviceName, serviceMethod, httpRespGroup
+aggregate   every sec...year;
+
+@info(name='ConvertToRequestStream')
 from TelemetryStream [context_reporter_kind  == "inbound"] select request_time_sec as timestamp, destination_uid as serverName, destination_service_name as serviceName, request_method as serviceMethod, convert((response_duration_nanosec/1000000), 'double') as responseTime, cast(response_code, 'int') as httpResponseCode,
 request_useragent as userAgent, source_uid as requestIP
 insert into RequestsStream;
 
+from  RequestsStream
+select  timestamp, str:replaceFirst(req.serverName,"kubernetes://", "")  as podName, serverName, serviceName, serviceMethod, responseTime, httpResponseCode, userAgent, requestIP
+insert into RequestsPodStream;
 
-@info(name='FilterUniqueServerServiceQuery')
-from RequestsStream#window.unique:first(serverName,serviceName) 
-select serverName, serviceName 
+
+from RequestsPodStream#window.unique:first(serverName ,serviceName, serviceMethod) as req join VickInfoTable as vick
+on  req.podName == vick.podName
+select vick.cellName as cellName, req.podName as serverName, req.serviceName as serviceName, req.serviceMethod as serviceMethod
 insert into ServiceTable;
 
 @info(name='HTTPResponseGroupProcessQuery')
-from RequestsStream
-select timestamp, serverName, serviceName, serviceMethod, cast(responseTime, 'double') as responseTime, str:concat(convert(httpResponseCode/100, "string"), 'xx') as httpRespGroup, userAgent, requestIP
+from RequestsPodStream as req join VickInfoTable as vick
+on req.podName == vick.podName
+select req.timestamp as timestamp, vick.cellName, req.podName as serverName, serviceName, serviceMethod, cast(responseTime, 'double') as responseTime, str:concat(convert(httpResponseCode/100, "string"), 'xx') as httpRespGroup, userAgent, requestIP
 insert into ProcessedRequestsStream;
 
 
