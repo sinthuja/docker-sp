@@ -21,3 +21,6 @@ hs_err_pid*
 
 rat.txt
 dockerfiles/kafka/files/*
+target/*
+.babelrc
+.eslintrc
