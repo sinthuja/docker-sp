@@ -25,6 +25,7 @@ ARG VICK_PROFILE_FILES=./files
 # copy entrypoint bash script to user home
 COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/conf/* ${WSO2_SERVER_HOME}/conf/dashboard/
 COPY --chown=wso2carbon:wso2 init.sh ${WORKING_DIRECTORY}/
+COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/patches/widgets/OpenTracingList/widgetConf.json ${WSO2_SERVER_HOME}/wso2/dashboard/deployment/web-ui-apps/portal/extensions/widgets/OpenTracingList/
 
 # expose ports
 EXPOSE 9714 9643 9614 7713 7613
