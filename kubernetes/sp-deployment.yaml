@@ -4,6 +4,43 @@
 #  name: vick-system
 #---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-conf
+  namespace: vick-system
+data:
+  init-wso2sp-db.sql: |
+    CREATE USER 'wso2carbon'@'%' IDENTIFIED BY 'wso2carbon';
+
+    CREATE DATABASE SP_WORKER_STATE_DB;
+    USE SP_WORKER_STATE_DB;
+    GRANT ALL ON SP_WORKER_STATE_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE SP_DASHBOARD_STATE_DB;
+    USE SP_DASHBOARD_STATE_DB;
+    GRANT ALL ON SP_DASHBOARD_STATE_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE MESSAGE_TRACING_DB;
+    USE MESSAGE_TRACING_DB;
+    GRANT ALL ON MESSAGE_TRACING_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE WSO2_METRICS_DB;
+    USE WSO2_METRICS_DB;
+    GRANT ALL ON WSO2_METRICS_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE WSO2_STATUS_DASHBOARD_DB;
+    USE WSO2_STATUS_DASHBOARD_DB;
+    GRANT ALL ON WSO2_STATUS_DASHBOARD_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE WSO2AM_MGW_ANALYTICS_DB;
+    USE WSO2AM_MGW_ANALYTICS_DB;
+    GRANT ALL ON WSO2AM_MGW_ANALYTICS_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE VICK_TELEMETRY_SUMMARY_DB;
+    USE VICK_TELEMETRY_SUMMARY_DB;
+    GRANT ALL ON VICK_TELEMETRY_SUMMARY_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: mysql
@@ -14,14 +51,6 @@ spec:
   selector:
     app: mysql
   clusterIP: None
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: db
-  namespace: vick-system
-data:
-  mysql-database: VICK_TELEMETRY_SUMMARY_DB
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -39,17 +68,25 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: mysql:5.7
+        image: mysql:5.6
         ports:
         - containerPort: 3306
         env:
-        - name: MYSQL_DATABASE
-          valueFrom:
-            configMapKeyRef:
-              name: db
-              key: mysql-database
         - name: MYSQL_ROOT_PASSWORD
           value: root
+        volumeMounts:
+        # - name: mysql-persistent-storage
+        # mountPath: /var/lib/mysql
+        - name: wso2sp-mysql-init
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        # - name: mysql-persistent-storage
+        # persistentVolumeClaim:
+        # claimName: mysql-pv-claim
+      - name: wso2sp-mysql-init
+        configMap:
+          name: mysql-init-conf
+
 ---
 apiVersion: v1
 kind: Service
@@ -61,6 +98,9 @@ spec:
   ports:
   - port: 9091
     name: http2
+    protocol: TCP
+  - port: 9411
+    name: zipkin
     protocol: TCP
   selector:
     app: vick-wso2sp-worker
@@ -81,10 +121,11 @@ spec:
     spec:
       containers:
       - name: vick-wso2sp-worker
-        image: "docker.io/vick-wso2sp-worker:4.3.0"
+        image: "vick-wso2sp-worker:4.3.0"
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9091
+        - containerPort: 9411
       initContainers:
       - name: init-mysql
         image: busybox
@@ -150,7 +191,7 @@ spec:
     spec:
       containers:
       - name: vick-wso2sp-dashboard
-        image: "docker.io/vick-wso2sp-dashboard:4.3.0"
+        image: "vick-wso2sp-dashboard:4.3.0"
         imagePullPolicy: IfNotPresent
         ports:
 #        - containerPort: 9714

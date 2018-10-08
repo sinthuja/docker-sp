@@ -1,4 +1,4 @@
-@App:name('vick-tracer')
+@App:name('tracer-app')
 @App:description("VICK Tracer Siddhi App which stores the spans accordingly from Zipkin format")
 
 @source(type='tracing-receiver', @map(type='keyvalue', fail.on.missing.attribute='false'))
@@ -56,7 +56,7 @@ insert into UniqueSpanIdZipkinStream;
 -- *
 -- * Start of Queries for New Span's parent is in the SpanTable
 -- *
-from UniqueSpanIdZipkinStream#rdbms:query('Message_Tracing_DB', str:concat("SELECT spanId AS parentUniqueSpanId, kind AS parentKind, COUNT(spanId) AS rowCount FROM SpanTable WHERE TRACEID='", TRACEID, "' AND spanId LIKE '", parentId, "-_'"), 'parentUniqueSpanId string, parentKind string, rowCount int')
+from UniqueSpanIdZipkinStream#rdbms:query('Message_Tracing_DB', str:concat("SELECT ANY_VALUE(spanId) AS parentUniqueSpanId, ANY_VALUE(kind) AS parentKind, COUNT(spanId) AS rowCount FROM SpanTable WHERE TRACEID='", TRACEID, "' AND spanId LIKE '", parentId, "-_'"), 'parentUniqueSpanId string, parentKind string, rowCount int')
 select
     TRACEID,
     id,

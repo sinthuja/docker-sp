@@ -357,8 +357,8 @@ wso2.datasources:
       type: RDBMS
       configuration:
         jdbcUrl: 'jdbc:mysql://mysql.vick-system.svc.cluster.local:3306/MESSAGE_TRACING_DB'
-        username: wso2carbon
-        password: wso2carbon
+        username: root
+        password: root
         driverClassName: com.mysql.jdbc.Driver
         maxPoolSize: 30
         idleTimeout: 60000
