@@ -40,7 +40,7 @@ request_useragent as userAgent, source_uid as requestIP
 insert into RequestsStream;
 
 from  RequestsStream
-select  timestamp, str:split(str:replaceFirst(serverName,"kubernetes://", ""), "-", 0) as cellName, str:replaceFirst(serverName,"kubernetes://", "")  as podName, serverName, serviceName, serviceMethod, responseTime, httpResponseCode, userAgent, requestIP
+select  timestamp, str:split(str:replaceFirst(serverName,"kubernetes://", ""), "--", 0) as cellName, str:replaceFirst(serverName,"kubernetes://", "")  as podName, serverName, serviceName, serviceMethod, responseTime, httpResponseCode, userAgent, requestIP
 insert into RequestsPodStream;
 
 
