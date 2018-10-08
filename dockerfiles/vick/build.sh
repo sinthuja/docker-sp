@@ -1,4 +1,4 @@
-kubectl delete ns vick-system
+kubectl delete -f ../../kubernetes/sp-deployment.yaml
 cp -rf widgets/*/dist/* dashboard/files/widgets
 cd dashboard
 docker build -t vick-wso2sp-dashboard:4.3.0 .
