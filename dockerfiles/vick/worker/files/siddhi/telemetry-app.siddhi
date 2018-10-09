@@ -13,7 +13,7 @@ define table VickInfoTable( cellName string, podName string);
 
 -- @sink(type='log', prefix='SUMMARY')
 @Source(type = 'http',
-        receiver.url='http://localhost:9092/vick-request',
+        receiver.url='http://0.0.0.0:9092/vick-request',
         basic.auth.enabled='false',
         @map(type='json'))
 define stream RequestsStream(timestamp long, serverName string, serviceName string, serviceMethod string, responseTime double, httpResponseCode int, userAgent string, requestIP string);

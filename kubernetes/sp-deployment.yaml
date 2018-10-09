@@ -99,6 +99,9 @@ spec:
   - port: 9091
     name: http2
     protocol: TCP
+  - port: 9092
+    name: http
+    protocol: TCP
   - port: 9411
     name: zipkin
     protocol: TCP
@@ -125,6 +128,7 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9091
+        - containerPort: 9092
         - containerPort: 9411
       initContainers:
       - name: init-mysql
