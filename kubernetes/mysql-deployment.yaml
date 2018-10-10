@@ -1,0 +1,116 @@
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: vick-system
+#---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-conf
+  namespace: vick-system
+data:
+  init-wso2sp-db.sql: |
+    SET GLOBAL max_connections = 1000;
+
+    CREATE USER 'wso2carbon'@'%' IDENTIFIED BY 'wso2carbon';
+
+    CREATE DATABASE SP_WORKER_STATE_DB;
+    USE SP_WORKER_STATE_DB;
+    GRANT ALL ON SP_WORKER_STATE_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE SP_DASHBOARD_STATE_DB;
+    USE SP_DASHBOARD_STATE_DB;
+    GRANT ALL ON SP_DASHBOARD_STATE_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE MESSAGE_TRACING_DB;
+    USE MESSAGE_TRACING_DB;
+    GRANT ALL ON MESSAGE_TRACING_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE WSO2_METRICS_DB;
+    USE WSO2_METRICS_DB;
+    GRANT ALL ON WSO2_METRICS_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE WSO2_STATUS_DASHBOARD_DB;
+    USE WSO2_STATUS_DASHBOARD_DB;
+    GRANT ALL ON WSO2_STATUS_DASHBOARD_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE WSO2AM_MGW_ANALYTICS_DB;
+    USE WSO2AM_MGW_ANALYTICS_DB;
+    GRANT ALL ON WSO2AM_MGW_ANALYTICS_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE VICK_TELEMETRY_SUMMARY_DB;
+    USE VICK_TELEMETRY_SUMMARY_DB;
+    GRANT ALL ON VICK_TELEMETRY_SUMMARY_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE DATABASE WSO2AM_STATS_DB;
+    USE WSO2AM_STATS_DB;
+    GRANT ALL ON WSO2AM_STATS_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE TABLE IF NOT EXISTS AM_USAGE_UPLOADED_FILES (
+    FILE_NAME varchar(255) NOT NULL,
+    FILE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FILE_PROCESSED tinyint(1) DEFAULT 0,
+    FILE_CONTENT MEDIUMBLOB DEFAULT NULL,
+    PRIMARY KEY (FILE_NAME, FILE_TIMESTAMP)
+    );
+
+    CREATE DATABASE WSO2AM_GW_ANALYTICS_DB;
+    USE WSO2AM_GW_ANALYTICS_DB;
+    GRANT ALL ON WSO2AM_GW_ANALYTICS_DB.* TO 'wso2carbon'@'%' identified by 'wso2carbon';
+
+    CREATE TABLE IF NOT EXISTS AM_USAGE_UPLOADED_FILES (
+    FILE_NAME varchar(255) NOT NULL,
+    FILE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FILE_PROCESSED tinyint(1) DEFAULT 0,
+    FILE_CONTENT MEDIUMBLOB DEFAULT NULL,
+    PRIMARY KEY (FILE_NAME, FILE_TIMESTAMP)
+    );
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: vick-system
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql
+  clusterIP: None
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: vick-system
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        volumeMounts:
+        # - name: mysql-persistent-storage
+        # mountPath: /var/lib/mysql
+        - name: wso2sp-mysql-init
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      # - name: mysql-persistent-storage
+      # persistentVolumeClaim:
+      # claimName: mysql-pv-claim
+      - name: wso2sp-mysql-init
+        configMap:
+          name: mysql-init-conf
+
+---

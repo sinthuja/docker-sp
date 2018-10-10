@@ -39,11 +39,11 @@ group by cellName, serverName, serviceName, serviceMethod, httpRespGroup
 aggregate   every sec...year;
 
 @info(name='ConvertToRequestStream')
-from TelemetryStream[not (destination_uid is null)] select request_time_sec as timestamp, destination_uid as serverName, destination_service_name as serviceName, request_method as serviceMethod, convert((response_duration_nanosec/1000000), 'double') as responseTime, cast(response_code, 'int') as httpResponseCode,
+from TelemetryStream[(not (destination_uid is null)) and (context_reporter_kind  == "inbound")] select request_time_sec as timestamp, destination_uid as serverName, destination_service_name as serviceName, request_method as serviceMethod, convert((response_duration_nanosec/1000000), 'double') as responseTime, cast(response_code, 'int') as httpResponseCode,
 request_useragent as userAgent, source_uid as requestIP
 insert into RequestsStream;
 
-from  RequestsStream
+from  RequestsStream [str:contains(serverName, "--")]
 select  timestamp, str:split(str:replaceFirst(serverName,"kubernetes://", ""), "--", 0) as cellName, str:replaceFirst(serverName,"kubernetes://", "")  as podName, serverName, serviceName, serviceMethod, responseTime, httpResponseCode, userAgent, requestIP
 insert into RequestsPodStream;
 
