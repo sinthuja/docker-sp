@@ -39,6 +39,7 @@
         <module>VICKAnalyticsRequestStatistics</module>
         <module>VICKAnalyticsLatencyOverTime</module>
         <module>VICKAnalyticsLatencyComparison</module>
+        <module>OpenTracingVisTimeline</module>
     </modules>
 
     <build>

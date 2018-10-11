@@ -323,18 +323,17 @@ class VICKAnalyticsRequestCountFilter extends Widget {
         let selectedOptionLabelName;
         let selectedOptionsName;
         let selectedValues;
-
         if (name === 0) {
             options = this.state.cells;
             selectedOptionLabelName = 'selectedCellValues';
             selectedOptionsName = 'cellOptions';
             selectedValues = values;
-        } else if (name === 1) {
+        } else if (name === 2) {
             options = this.state.services;
             selectedOptionLabelName = 'selectedServiceValues';
             selectedOptionsName = 'serviceOptions';
             selectedValues = values;
-        } else if (name === 2){
+        } else if (name === 1){
             options = this.state.servers;
             selectedOptionLabelName = 'selectedServerValues';
             selectedOptionsName = 'serverOptions';
@@ -393,6 +392,7 @@ class VICKAnalyticsRequestCountFilter extends Widget {
 
     render() {
         const { classes } = this.props;
+        console.log("this.state.perspective "+this.state.perspective+"      "+this.state.selectedServerValues)
         return (
             <JssProvider generateClassName={generateClassName}>
                 <MuiThemeProvider theme={this.props.muiTheme.name === 'dark' ? darkTheme : lightTheme}>
