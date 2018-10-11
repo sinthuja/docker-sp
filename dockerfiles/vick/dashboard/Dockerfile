@@ -23,7 +23,6 @@ MAINTAINER WSO2 Docker Maintainers "dev@wso2.org"
 ARG VICK_PROFILE_FILES=./files
 
 # copy entrypoint bash script to user home
-COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/conf/* ${WSO2_SERVER_HOME}/conf/dashboard/
 COPY --chown=wso2carbon:wso2  ${VICK_PROFILE_FILES}/widgets ${WSO2_SERVER_HOME}/wso2/dashboard/deployment/web-ui-apps/portal/extensions/widgets
 COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/dashboard/* ${WSO2_SERVER_HOME}/wso2/dashboard/resources/dashboards/
 COPY --chown=wso2carbon:wso2 init.sh ${WORKING_DIRECTORY}/

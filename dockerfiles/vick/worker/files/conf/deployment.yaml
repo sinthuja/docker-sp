@@ -18,6 +18,7 @@
 wso2.carbon:
     # value to uniquely identify a server
   type: wso2-sp
+
   id: wso2-sp
     # server name
   name: WSO2 Stream Processor

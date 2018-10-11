@@ -24,8 +24,6 @@ ARG VICK_PROFILE_FILES=./files
 
 # copy the osgified jars
 COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/lib/*.jar ${WSO2_SERVER_HOME}/lib/
-COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/siddhi/* ${WSO2_SERVER_HOME}/wso2/worker/deployment/siddhi-files/
-COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/conf/* ${WSO2_SERVER_HOME}/conf/worker/
 
 
 # copy entrypoint bash script to user home
