@@ -39,13 +39,17 @@ const chartConfig = {
                     { strokeWidth: 2, markRadius: 3 },
             },
         ],
+    legendOrientation: "right",
     legend: true,
+    legendOffset: 100,
     animate: false,
     style: {
         legendTitleColor: '#5d6e77',
         legendTextColor: '#5d6e77',
         tickLabelColor: '#5d6e77',
         axisLabelColor: '#5d6e77',
+        legendTextSize: 12,
+        legendTextBreakLength: 28,
     },
     gridColor: '#5d6e77',
     brush: true,
@@ -153,6 +157,7 @@ class VICKAnalyticsRequestCountOverTime extends Widget {
     }
 
     getFilterQuery(){
+        let finalFilterCondition = "";
         let filterCondition = "(";
         if (!this.state.selectedCellValues.some(value => value.value === 'All')
             && this.state.selectedCellValues.length !== 0) {
@@ -165,13 +170,20 @@ class VICKAnalyticsRequestCountOverTime extends Widget {
             filterCondition += ")";
         }
 
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
+        }
+        filterCondition="";
+
         if (!this.state.selectedServerValues.some(value => value.value === 'All')
             && this.state.selectedServerValues.length !== 0) {
-            if (filterCondition !== "("){
+            if (finalFilterCondition !== ""){
                 filterCondition += " and (";
+            } else {
+                filterCondition = "(";
             }
             this.state.selectedServerValues.forEach((value) => {
-                if (filterCondition !== ""){
+                if (!filterCondition.endsWith("(")){
                     filterCondition += " or ";
                 }
                 filterCondition += "serverName=='" + value.value + "'";
@@ -179,38 +191,54 @@ class VICKAnalyticsRequestCountOverTime extends Widget {
             filterCondition += ")";
         }
 
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
+        }
+        filterCondition="";
+
         if (!this.state.selectedServiceValues.some(value => value.value === 'All')
             && this.state.selectedServiceValues.length !== 0) {
-            if (filterCondition !== "("){
+            if (finalFilterCondition !== ""){
                 filterCondition += " and (";
+            } else {
+                filterCondition = "(";
             }
             this.state.selectedServiceValues.forEach((value) => {
-                if (filterCondition !== ""){
+                if (!filterCondition.endsWith("(")){
                     filterCondition += " or ";
                 }
                 filterCondition += "serviceName=='" + value.value + "'";
             });
             filterCondition += ")";
         }
+
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
+        }
+        filterCondition="";
 
         if (!this.state.selectedMethodValues.some(value => value.value === 'All')
             && this.state.selectedMethodValues.length !== 0) {
-            if (filterCondition !== "("){
+            if (!finalFilterCondition.endsWith("(")){
                 filterCondition += " and (";
+            } else {
+                filterCondition = "(";
             }
             this.state.selectedMethodValues.forEach((value) => {
-                if (filterCondition !== ""){
+                if (filterCondition !== "("){
                     filterCondition += " or ";
                 }
-                filterCondition += "serviceName=='" + value.value + "'";
+                filterCondition += "serviceMethod=='" + value.value + "'";
             });
             filterCondition += ")";
         }
 
-        if (filterCondition === "("){
-            filterCondition = "";
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
         }
-        return filterCondition;
+
+        console.log(finalFilterCondition);
+        return finalFilterCondition;
     }
 
     /**
