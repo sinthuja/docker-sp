@@ -10,7 +10,7 @@ metadata:
   namespace: vick-system
 data:
   init-wso2sp-db.sql: |
-    SET GLOBAL max_connections = 1000;
+    SET GLOBAL max_connections = 10000;
 
     CREATE USER 'wso2carbon'@'%' IDENTIFIED BY 'wso2carbon';
 

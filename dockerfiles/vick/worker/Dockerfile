@@ -23,6 +23,7 @@ MAINTAINER WSO2 Docker Maintainers "dev@wso2.org"
 ARG VICK_PROFILE_FILES=./files
 
 # copy the osgified jars
+RUN rm ${WSO2_SERVER_HOME}/lib/siddhi-store-rdbms*.jar
 COPY --chown=wso2carbon:wso2 ${VICK_PROFILE_FILES}/lib/*.jar ${WSO2_SERVER_HOME}/lib/
 
 
