@@ -41,7 +41,7 @@ const chartConfig = {
         ],
     legendOrientation: "right",
     legend: true,
-    legendOffset: 100,
+    legendOffset: 80,
     animate: false,
     style: {
         legendTitleColor: '#5d6e77',
@@ -49,7 +49,7 @@ const chartConfig = {
         tickLabelColor: '#5d6e77',
         axisLabelColor: '#5d6e77',
         legendTextSize: 12,
-        legendTextBreakLength: 28,
+        legendTextBreakLength: 24,
     },
     gridColor: '#5d6e77',
     brush: true,
