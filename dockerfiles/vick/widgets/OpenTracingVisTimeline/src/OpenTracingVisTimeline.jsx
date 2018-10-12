@@ -121,12 +121,19 @@ class OpenTracingVisTimeline extends Widget {
                     endTime = new Date(data[i][5] + 1000);
                 }
                 let spanName = data[i][4] + " ("+ (endTime - startTime) +" ms) ";
+                let toolTip = "<b>Name: </b>" + data[i][4] +"</br><b>Duration: </b>"+  (endTime - startTime) +" ms";
+                if(data[i][0]){
+                    toolTip += "</br> <b>Operation Name: </b>" + data[i][0];
+                }
+                if(data[i][10]){
+                    toolTip +=  "</br> <b>Span Kind: </b>"+ data[i][10];
+                }
                 let item = {
                     type2: "span",
                     start: startTime,
                     end: endTime,
                     content: spanName,
-                    title: spanName,
+                    title: toolTip,
                     id: i + 1 + 0.1,
                     group: i + 1,
                 };

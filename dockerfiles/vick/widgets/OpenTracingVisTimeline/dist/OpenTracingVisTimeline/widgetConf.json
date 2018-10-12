@@ -16,7 +16,7 @@
           "datasourceName": "Message_Tracing_DB",
           "tableName": "SpanTable",
           "queryData": {
-            "query": "select operationName, traceId, spanId, parentId, serviceName, startTime, endTime, duration, tags, baggageItems from SpanTable where traceId = '${traceId}'"
+            "query": "select operationName, traceId, spanId, parentId, serviceName, startTime, endTime, duration, tags, baggageItems, kind  from SpanTable where traceId = '${traceId}'"
           },
           "incrementalColumn": "startTime",
           "publishingInterval": 5,
