@@ -39,17 +39,20 @@ const chartConfigTemplate = {
                     {strokeWidth: 1, markRadius: 2},
             },
         ],
+    legendOrientation: "right",
+    legend: true,
+    legendOffset: 150,
     style: {
-        legendTitleColor: '#5d6e77',
         legendTextColor: '#5d6e77',
         tickLabelColor: '#5d6e77',
         axisLabelColor: '#5d6e77',
+        legendTextSize: 12,
+        legendTextBreakLength: 35,
     },
     gridColor: '#5d6e77',
     brush: false,
     append: false,
 };
-
 class VICKAnalyticsRequestCountComparison extends Widget {
     /**
      * Constructor. Initialises the widget.
@@ -144,6 +147,7 @@ class VICKAnalyticsRequestCountComparison extends Widget {
     }
 
     getFilterQuery(){
+        let finalFilterCondition = "";
         let filterCondition = "(";
         if (!this.state.selectedCellValues.some(value => value.value === 'All')
             && this.state.selectedCellValues.length !== 0) {
@@ -156,13 +160,20 @@ class VICKAnalyticsRequestCountComparison extends Widget {
             filterCondition += ")";
         }
 
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
+        }
+        filterCondition="";
+
         if (!this.state.selectedServerValues.some(value => value.value === 'All')
             && this.state.selectedServerValues.length !== 0) {
-            if (filterCondition !== "("){
+            if (finalFilterCondition !== ""){
                 filterCondition += " and (";
+            } else {
+                filterCondition = "(";
             }
             this.state.selectedServerValues.forEach((value) => {
-                if (filterCondition !== ""){
+                if (!filterCondition.endsWith("(")){
                     filterCondition += " or ";
                 }
                 filterCondition += "serverName=='" + value.value + "'";
@@ -170,39 +181,56 @@ class VICKAnalyticsRequestCountComparison extends Widget {
             filterCondition += ")";
         }
 
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
+        }
+        filterCondition="";
+
         if (!this.state.selectedServiceValues.some(value => value.value === 'All')
             && this.state.selectedServiceValues.length !== 0) {
-            if (filterCondition !== "("){
+            if (finalFilterCondition !== ""){
                 filterCondition += " and (";
+            } else {
+                filterCondition = "(";
             }
             this.state.selectedServiceValues.forEach((value) => {
-                if (filterCondition !== ""){
+                if (!filterCondition.endsWith("(")){
                     filterCondition += " or ";
                 }
                 filterCondition += "serviceName=='" + value.value + "'";
             });
             filterCondition += ")";
         }
+
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
+        }
+        filterCondition="";
 
         if (!this.state.selectedMethodValues.some(value => value.value === 'All')
             && this.state.selectedMethodValues.length !== 0) {
-            if (filterCondition !== "("){
+            if (!finalFilterCondition.endsWith("(")){
                 filterCondition += " and (";
+            } else {
+                filterCondition = "(";
             }
             this.state.selectedMethodValues.forEach((value) => {
-                if (filterCondition !== ""){
+                if (filterCondition !== "("){
                     filterCondition += " or ";
                 }
-                filterCondition += "serviceName=='" + value.value + "'";
+                filterCondition += "serviceMethod=='" + value.value + "'";
             });
             filterCondition += ")";
         }
 
-        if (filterCondition === "("){
-            filterCondition = "";
+        if (filterCondition !== "("){
+            finalFilterCondition += filterCondition;
         }
-        return filterCondition;
+
+        console.log(finalFilterCondition);
+        return finalFilterCondition;
     }
+
 
     /**
      * Query is initialised after the user input is received
